@@ -2,6 +2,19 @@ name: YouTube Video Uploader
 
 on:
   workflow_dispatch:
+    inputs:
+      video_url:
+        description: Direct download link to your video
+        required: true
+        type: string
+      video_title:
+        description: YouTube video title
+        required: true
+        type: string
+      video_description:
+        description: YouTube video description
+        required: false
+        type: string
 
 jobs:
   upload:
@@ -19,10 +32,16 @@ jobs:
       - name: Install required tools
         run: pip install -r requirements.txt
 
+      - name: Download video
+        env:
+          VIDEO_URL: ${{ inputs.video_url }}
+        run: curl -L --fail "$VIDEO_URL" -o video.mp4
+
       - name: Upload video to YouTube
         env:
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           VIDEO_TITLE: ${{ inputs.video_title }}
+          VIDEO_DESCRIPTION: ${{ inputs.video_description }}
         run: python uploader.py
